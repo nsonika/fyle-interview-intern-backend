@@ -1,3 +1,4 @@
+import logging
 from flask import Blueprint
 from core import db
 from core.apis import decorators
@@ -6,7 +7,6 @@ from core.models.assignments import Assignment, AssignmentStateEnum
 from core.models.teachers import Teacher
 from .schema import AssignmentSchema, TeacherSchema, AssignmentGradeSchema
 from marshmallow import ValidationError
-from core.libs import assertions
 
 principal_assignments_resources = Blueprint('principal_assignments_resources', __name__)
 
@@ -38,10 +38,11 @@ def grade_assignment(principal, payload):
         assignment = Assignment.query.get(grade_data.id)
         
         if assignment is None:
-            return APIResponse.respond_error(message='Assignment not found', status_code=404)
+            return APIResponse.respond(data={'error': 'Assignment not found'}, status=404)
 
+        logging.info(f"Assignment state: {assignment.state}")
         if assignment.state == AssignmentStateEnum.DRAFT.value:
-            return APIResponse.respond_error(message='Cannot grade a draft assignment', status_code=400)
+            return APIResponse.respond(data={'error': 'Cannot grade a draft assignment'}, status=400)
         
         graded_assignment = Assignment.mark_grade(
             _id=grade_data.id,
@@ -52,6 +53,7 @@ def grade_assignment(principal, payload):
         graded_assignment_dump = AssignmentSchema().dump(graded_assignment)
         return APIResponse.respond(data=graded_assignment_dump)
     except ValidationError as e:
-        return APIResponse.respond_error(message=str(e), status_code=400)
+        return APIResponse.respond(data={'error': str(e)}, status=400)
     except Exception as e:
-        return APIResponse.respond_error(message=str(e), status_code=500)
+        logging.error(f"Unexpected error: {str(e)}")
+        return APIResponse.respond(data={'error': str(e)}, status=500)

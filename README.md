@@ -22,37 +22,32 @@ This challenge involves writing a backend service for a classroom. The challenge
 
 You will hear back within 48 hours from us via email. 
 
+## Prerequisites 📝
+
+- Ensure Docker is installed and running on your machine.
+- A Flask application ready for deployment
+
 
 ## Installation
 
 1. Fork this repository to your github account
 2. Clone the forked repository and proceed with steps mentioned below
 
-### Install requirements
+## Steps 🔧
+
+### 1. Create a Docker Image 
+
+```sh
+docker build -t fyle .
+```
+
+### 2. Run the Docker Container 
+
+```sh
+docker run fyle
+```
+### 3. Check Test Coverage 
 
 ```
-virtualenv env --python=python3.8
-source env/bin/activate
-pip install -r requirements.txt
-```
-### Reset DB
-
-```
-export FLASK_APP=core/server.py
-rm core/store.sqlite3
-flask db upgrade -d core/migrations/
-```
-### Start Server
-
-```
-bash run.sh
-```
-### Run Tests
-
-```
-pytest -vvv -s tests/
-
-# for test coverage report
-# pytest --cov
-# open htmlcov/index.html
+pytest --cov
 ```
